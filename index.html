@@ -1,0 +1,134 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>京美優惠登記</title>
+  <script src="https://static.line-scdn.net/liff/edge/2/sdk.js"></script>
+  <style>
+    body {
+      font-family: 'Helvetica Neue', sans-serif;
+      background: #f5f9f6;
+      padding: 20px;
+      margin: 0;
+    }
+    .card {
+      background: #fff;
+      border-radius: 16px;
+      padding: 24px;
+      box-shadow: 0 4px 8px rgba(0,0,0,0.05);
+      max-width: 500px;
+      margin: auto;
+    }
+    h1 {
+      text-align: center;
+      color: #06c755;
+    }
+    label {
+      display: block;
+      margin-top: 12px;
+      font-weight: bold;
+    }
+    input, textarea {
+      width: 100%;
+      padding: 10px;
+      margin-top: 4px;
+      border: 1px solid #ccc;
+      border-radius: 8px;
+      font-size: 16px;
+    }
+    button {
+      margin-top: 20px;
+      width: 100%;
+      padding: 12px;
+      background: #06c755;
+      color: #fff;
+      font-size: 18px;
+      border: none;
+      border-radius: 12px;
+      cursor: pointer;
+    }
+    .success {
+      text-align: center;
+      color: #06c755;
+      font-size: 20px;
+      margin-top: 40px;
+    }
+  </style>
+</head>
+<body>
+  <div class="card">
+    <h1>京美專屬優惠登記</h1>
+    <form id="infoForm">
+      <label>電話</label>
+      <input type="text" name="phone" required />
+
+      <label>想了解的內容</label>
+      <input type="text" name="interest" required />
+
+      <label>備註</label>
+      <textarea name="note" rows="3"></textarea>
+
+      <input type="hidden" name="lineName" />
+      <input type="hidden" name="lineUserId" />
+
+      <button type="submit">送出登記</button>
+    </form>
+
+    <div class="success" id="successMsg" style="display:none;">
+      ✅ 登記成功！請留意我們的 LINE 訊息。
+    </div>
+  </div>
+
+  <script>
+    const liffId = "2007890962-PDQk9qOl";
+
+    async function initLiff() {
+      await liff.init({ liffId });
+      if (!liff.isLoggedIn()) liff.login();
+
+      const profile = await liff.getProfile();
+      document.querySelector('input[name="lineName"]').value = profile.displayName;
+      document.querySelector('input[name="lineUserId"]').value = profile.userId;
+    }
+
+    document.getElementById('infoForm').addEventListener('submit', async (e) => {
+      e.preventDefault();
+      const form = e.target;
+      const data = {
+        phone: form.phone.value,
+        interest: form.interest.value,
+        note: form.note.value,
+        lineName: form.lineName.value,
+        lineUserId: form.lineUserId.value,
+      };
+
+      try {
+        await fetch("https://webhook.site/你的n8n網址", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify(data),
+        });
+
+        // 傳送 LINE 訊息回聊天室
+        if (liff.isInClient()) {
+          await liff.sendMessages([
+            {
+              type: "text",
+              text: `✅ 感謝您登記優惠，我們會盡快與您聯繫！`
+            }
+          ]);
+        }
+
+        form.style.display = "none";
+        document.getElementById('successMsg').style.display = "block";
+        setTimeout(() => liff.closeWindow(), 3000);
+      } catch (err) {
+        alert("送出失敗，請稍後再試");
+      }
+    });
+
+    initLiff();
+  </script>
+</body>
+</html>
