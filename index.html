@@ -1,134 +1,185 @@
 <!DOCTYPE html>
 <html lang="zh-Hant">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>京美優惠登記</title>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>京美｜專屬優惠登記</title>
+  <link rel="preconnect" href="https://static.line-scdn.net">
   <script src="https://static.line-scdn.net/liff/edge/2/sdk.js"></script>
   <style>
-    body {
-      font-family: 'Helvetica Neue', sans-serif;
-      background: #f5f9f6;
-      padding: 20px;
-      margin: 0;
+    :root{
+      --brand:#06C755; /* LINE 綠，可換成你的品牌色 */
+      --ink:#111827; --muted:#6B7280; --bg:#F6F7F9; --white:#fff;
+      --radius:18px;
     }
-    .card {
-      background: #fff;
-      border-radius: 16px;
-      padding: 24px;
-      box-shadow: 0 4px 8px rgba(0,0,0,0.05);
-      max-width: 500px;
-      margin: auto;
+    *{box-sizing:border-box}
+    body{margin:0;background:var(--bg);font-family: system-ui, -apple-system, "Segoe UI", Roboto, "Noto Sans TC", Arial, "PingFang TC", "Microsoft JhengHei", sans-serif;color:var(--ink)}
+    .wrap{min-height:100dvh;display:grid;place-items:center;padding:24px}
+    .card{
+      width:min(720px,100%); background:var(--white); border-radius:var(--radius);
+      box-shadow: 0 10px 30px rgba(16,24,40,.12); padding:24px 20px; animation:pop .25s ease-out
     }
-    h1 {
-      text-align: center;
-      color: #06c755;
+    @keyframes pop{from{transform:translateY(8px);opacity:0} to{transform:none;opacity:1}}
+    header{display:flex;align-items:center;gap:12px;margin-bottom:14px}
+    .logo{width:36px;height:36px;border-radius:12px;background:var(--brand)}
+    h1{font-size:20px;margin:0}
+    .sub{color:var(--muted);font-size:14px}
+    form{display:grid;gap:14px;margin-top:8px}
+    .row{display:grid;gap:8px}
+    label{font-weight:600;font-size:14px}
+    input,select,textarea{
+      width:100%; padding:14px 12px; border:1px solid #E5E7EB; border-radius:12px; background:#fff; font-size:16px;
+      outline:none; transition:border .15s, box-shadow .15s
     }
-    label {
-      display: block;
-      margin-top: 12px;
-      font-weight: bold;
+    input:focus,select:focus,textarea:focus{border-color:#cbd5e1; box-shadow:0 0 0 4px rgba(6,199,85,.08)}
+    .muted{color:var(--muted); font-size:13px}
+    .pill{
+      display:inline-grid;grid-auto-flow:column;gap:8px;align-items:center;justify-content:center;
+      padding:14px 16px;border-radius:999px;background:var(--brand);color:#fff;font-weight:700;
+      cursor:pointer;border:none;font-size:16px;transition:transform .05s ease;
     }
-    input, textarea {
-      width: 100%;
-      padding: 10px;
-      margin-top: 4px;
-      border: 1px solid #ccc;
-      border-radius: 8px;
-      font-size: 16px;
+    .pill:active{transform:translateY(1px)}
+    .hidden{display:none}
+    .success{
+      text-align:center; padding:24px 10px
     }
-    button {
-      margin-top: 20px;
-      width: 100%;
-      padding: 12px;
-      background: #06c755;
-      color: #fff;
-      font-size: 18px;
-      border: none;
-      border-radius: 12px;
-      cursor: pointer;
-    }
-    .success {
-      text-align: center;
-      color: #06c755;
-      font-size: 20px;
-      margin-top: 40px;
+    .success h2{margin:8px 0 6px 0}
+    .badge{
+      display:inline-flex;align-items:center;gap:8px;padding:8px 12px;border-radius:999px;background:#E9FBF0;color:#065f46;font-weight:600;font-size:14px
     }
   </style>
 </head>
 <body>
-  <div class="card">
-    <h1>京美專屬優惠登記</h1>
-    <form id="infoForm">
-      <label>電話</label>
-      <input type="text" name="phone" required />
+  <div class="wrap">
+    <main class="card" id="card">
+      <header>
+        <div class="logo" aria-hidden="true"></div>
+        <div>
+          <h1>京美｜專屬優惠登記</h1>
+          <div class="sub">幾秒完成，立即建立你的優惠名單</div>
+        </div>
+      </header>
 
-      <label>想了解的內容</label>
-      <input type="text" name="interest" required />
+      <div class="row muted" id="hello">載入中…</div>
 
-      <label>備註</label>
-      <textarea name="note" rows="3"></textarea>
+      <form id="form">
+        <input type="hidden" name="lineUserId" id="lineUserId" />
+        <input type="hidden" name="lineDisplayName" id="lineDisplayName" />
 
-      <input type="hidden" name="lineName" />
-      <input type="hidden" name="lineUserId" />
+        <div class="row">
+          <label for="phone">聯絡電話</label>
+          <input id="phone" name="phone" inputmode="tel" placeholder="請輸入手機號碼" required />
+        </div>
 
-      <button type="submit">送出登記</button>
-    </form>
+        <div class="row">
+          <label for="interest">想了解的產品</label>
+          <select id="interest" name="interest" required>
+            <option value="" selected disabled>請選擇</option>
+            <option>護具 / 運動支撐</option>
+            <option>機能服飾</option>
+            <option>舒緩與保健</option>
+            <option>其他</option>
+          </select>
+        </div>
 
-    <div class="success" id="successMsg" style="display:none;">
-      ✅ 登記成功！請留意我們的 LINE 訊息。
-    </div>
+        <div class="row">
+          <label for="note">備註（選填）</label>
+          <textarea id="note" name="note" rows="3" placeholder="想對我們說的話、尺寸、使用情境等"></textarea>
+          <div class="muted">送出後，我們會以 LINE 推送回覆你。</div>
+        </div>
+
+        <button type="submit" class="pill">送出資料並加入優惠名單</button>
+      </form>
+
+      <section id="done" class="success hidden">
+        <div class="badge">🎉 送出成功</div>
+        <h2>我們已收到您的需求</h2>
+        <p class="muted">後續將透過 LINE 傳送優惠與回覆給您，敬請留意。</p>
+      </section>
+    </main>
   </div>
 
   <script>
-    const liffId = "2007890962-PDQk9qOl";
+    const LIFF_ID = "2007890962-PDQk9qOl"; // ← 你的 LIFF ID
+    const N8N_WEBHOOK_URL = "https://YOUR-N8N-HOSTING/webhook/your-route"; // ← 換成你的 n8n webhook
 
-    async function initLiff() {
-      await liff.init({ liffId });
-      if (!liff.isLoggedIn()) liff.login();
+    const els = {
+      hello: document.getElementById('hello'),
+      form: document.getElementById('form'),
+      done: document.getElementById('done'),
+      card: document.getElementById('card'),
+      lineUserId: document.getElementById('lineUserId'),
+      lineDisplayName: document.getElementById('lineDisplayName')
+    };
 
-      const profile = await liff.getProfile();
-      document.querySelector('input[name="lineName"]').value = profile.displayName;
-      document.querySelector('input[name="lineUserId"]').value = profile.userId;
+    async function bootstrap() {
+      try {
+        await liff.init({ liffId: LIFF_ID });
+
+        if (!liff.isLoggedIn()) {
+          liff.login();
+          return;
+        }
+
+        const profile = await liff.getProfile();
+        els.hello.textContent = `👋 歡迎回來，${profile.displayName}`;
+        els.lineUserId.value = profile.userId || '';
+        els.lineDisplayName.value = profile.displayName || '';
+
+      } catch (e) {
+        console.error(e);
+        els.hello.textContent = "⚠️ LIFF 初始化失敗，請在 LINE 內重新開啟。";
+      }
     }
 
-    document.getElementById('infoForm').addEventListener('submit', async (e) => {
-      e.preventDefault();
-      const form = e.target;
-      const data = {
-        phone: form.phone.value,
-        interest: form.interest.value,
-        note: form.note.value,
-        lineName: form.lineName.value,
-        lineUserId: form.lineUserId.value,
+    async function postToN8N(payload){
+      const res = await fetch(N8N_WEBHOOK_URL, {
+        method: "POST",
+        headers: {"Content-Type":"application/json"},
+        body: JSON.stringify(payload)
+      });
+      if (!res.ok) throw new Error("n8n webhook error");
+      return res.json().catch(()=> ({}));
+    }
+
+    els.form.addEventListener('submit', async (ev) => {
+      ev.preventDefault();
+
+      const payload = {
+        lineUserId: els.lineUserId.value,
+        lineDisplayName: els.lineDisplayName.value,
+        phone: document.getElementById('phone').value.trim(),
+        interest: document.getElementById('interest').value,
+        note: document.getElementById('note').value.trim(),
+        ts: new Date().toISOString(),
+        source: "liff-京美-優惠登記"
       };
 
       try {
-        await fetch("https://webhook.site/你的n8n網址", {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify(data),
-        });
+        await postToN8N(payload);
 
-        // 傳送 LINE 訊息回聊天室
+        // 回覆用戶一則訊息（需勾 chat_message.write）
         if (liff.isInClient()) {
-          await liff.sendMessages([
-            {
-              type: "text",
-              text: `✅ 感謝您登記優惠，我們會盡快與您聯繫！`
-            }
-          ]);
+          await liff.sendMessages([{
+            type: "text",
+            text: "已完成登記 ✅ 我們會盡快回覆並提供專屬優惠。"
+          }]);
         }
 
-        form.style.display = "none";
-        document.getElementById('successMsg').style.display = "block";
-        setTimeout(() => liff.closeWindow(), 3000);
+        // 顯示成功畫面
+        els.form.classList.add('hidden');
+        els.done.classList.remove('hidden');
+
+        // 3 秒後自動關閉（在 LINE 內）
+        setTimeout(() => { if (liff.isInClient()) liff.closeWindow(); }, 3000);
+
       } catch (err) {
-        alert("送出失敗，請稍後再試");
+        console.error(err);
+        alert("送出失敗，請稍後再試或直接在聊天室留言給我們。");
       }
     });
 
-    initLiff();
+    bootstrap();
   </script>
 </body>
 </html>
